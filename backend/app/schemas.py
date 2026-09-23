@@ -71,3 +71,19 @@ class QualityScanCompareRequest(BaseModel):
     """Two scans of the same project; they must share an identical window."""
     scanIdA: str
     scanIdB: str
+
+
+# ---------- quote search ----------
+
+class QuoteSearchRequest(BaseModel):
+    """Phrase search over transcript segments.
+
+    Whitespace in ``query`` is ignored when matching; ``speaker`` (optional)
+    restricts matches to one exact speaker. ``document`` may carry the
+    editor's current (possibly unsaved) document; otherwise the saved
+    project document is searched.
+    """
+    query: str = ""
+    speaker: str | None = None
+    caseSensitive: bool = False
+    document: DocumentIn | None = None

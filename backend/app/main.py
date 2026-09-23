@@ -9,7 +9,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import db, importer, quality, rules
+from . import db, importer, quality, quotes, rules
 from .merge import merge_documents
 from .schemas import (
     DocumentIn,
@@ -18,6 +18,7 @@ from .schemas import (
     ProjectUpdate,
     QualityCheckRequest,
     QualityScanCompareRequest,
+    QuoteSearchRequest,
     RuleIn,
     RulePreviewRequest,
 )
@@ -165,6 +166,31 @@ async def import_into_project(project_id: str, request: Request) -> dict:
     # import replaces the transcript but preserves existing annotations
     doc["annotations"] = project["document"].get("annotations", [])
     return db.update_project(project_id, None, doc)
+
+
+# ---------- quote search ----------
+
+@app.post("/api/projects/{project_id}/quote-search")
+def quote_search(project_id: str, payload: QuoteSearchRequest) -> dict:
+    """Find quote-phrase hits across adjacent same-speaker segments.
+
+    Searches the document carried in the request (the editor's current,
+    possibly unsaved state) or, when omitted, the saved project document.
+    An empty / whitespace-only query performs no search and returns 400.
+    """
+    project = _get_or_404(project_id)
+    if not payload.query or not payload.query.strip():
+        raise HTTPException(status_code=400, detail="请输入要检索的引语")
+    document = _doc(payload.document) if payload.document is not None \
+        else project["document"]
+    try:
+        result = quotes.search_quotes(
+            document, payload.query, payload.speaker, payload.caseSensitive)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    result["projectId"] = project_id
+    result["projectName"] = project["name"]
+    return result
 
 
 # ---------- rule-based batch annotation ----------

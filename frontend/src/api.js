@@ -83,4 +83,12 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ scanIdA, scanIdB }),
     }),
+
+  // ----- quote search -----
+  quoteSearch: (projectId, { query, speaker = null, caseSensitive = false,
+    document = null }) =>
+    request(`/projects/${projectId}/quote-search`, {
+      method: 'POST',
+      body: JSON.stringify({ query, speaker, caseSensitive, document }),
+    }),
 };
