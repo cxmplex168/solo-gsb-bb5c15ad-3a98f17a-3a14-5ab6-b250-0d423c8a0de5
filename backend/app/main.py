@@ -9,7 +9,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import db, importer, quality, rules
+from . import db, importer, quality, quotes, rules
 from .merge import merge_documents
 from .schemas import (
     DocumentIn,
@@ -18,6 +18,7 @@ from .schemas import (
     ProjectUpdate,
     QualityCheckRequest,
     QualityScanCompareRequest,
+    QuoteSearchRequest,
     RuleIn,
     RulePreviewRequest,
 )
@@ -285,6 +286,29 @@ def undo_rule_run(run_id: str) -> dict:
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc))
     return {"run": result["run"], "document": result["document"]}
+
+
+# ---------- quote search ----------
+
+@app.post("/api/projects/{project_id}/quote-search")
+def quote_search(project_id: str, payload: QuoteSearchRequest) -> dict:
+    """Search a spoken phrase across adjacent same-speaker segments.
+
+    Uses the editor's current document when provided (so unsaved edits
+    are searchable), otherwise the saved project document.
+    """
+    project = _get_or_404(project_id)
+    if not payload.query.strip():
+        raise HTTPException(status_code=400,
+                            detail="请输入要检索的引语内容")
+    document = (_doc(payload.document) if payload.document is not None
+                else project["document"])
+    try:
+        return quotes.search(document, payload.query,
+                             speaker=payload.speaker,
+                             case_sensitive=payload.caseSensitive)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 # ---------- annotation quality check ----------

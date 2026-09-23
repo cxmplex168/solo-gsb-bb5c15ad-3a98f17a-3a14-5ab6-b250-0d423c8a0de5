@@ -403,6 +403,12 @@ code {
   border-right: 2px dashed var(--danger);
   pointer-events: none;
 }
+.tl-focus.tl-focus-quote {
+  background: rgba(51, 97, 217, 0.14);
+  border-left: 2px solid var(--primary);
+  border-right: 2px solid var(--primary);
+}
+.quote-focus-hint { background: #eef3ff !important; color: var(--primary-dark) !important; }
 .tl-annotation.qc-hit {
   outline: 2px solid var(--danger);
   outline-offset: 1px;
@@ -527,3 +533,47 @@ code {
 .qc-group-new { border-left: 4px solid var(--danger); }
 .qc-group-resolved { border-left: 4px solid var(--ok); }
 .qc-group-persistent { border-left: 4px solid var(--warn); }
+
+/* ---------- quote search ---------- */
+.quote-search summary {
+  cursor: pointer;
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+}
+.qs-summary-hint { font-weight: 400; }
+.qs-controls {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  margin: 12px 0 6px;
+}
+.qs-query { flex: 1 1 260px; }
+.qs-speaker { width: 200px; flex: none; }
+.qs-case {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 13px; color: #414d61; white-space: nowrap;
+}
+.qs-case input { width: auto; margin: 0; }
+.qs-hint { margin: 4px 0; }
+.qs-results { margin-top: 10px; }
+.qs-count { font-size: 13px; margin-bottom: 8px; }
+.qs-hit {
+  border: 1px solid var(--border); border-left: 4px solid var(--primary);
+  border-radius: 6px; padding: 8px 12px; margin-bottom: 8px;
+  background: #fcfdff; cursor: pointer;
+}
+.qs-hit:hover { background: #f4f7ff; }
+.qs-hit.active {
+  box-shadow: 0 0 0 2px rgba(51, 97, 217, 0.35);
+  background: #f2f6ff;
+}
+.qs-hit-head {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.qs-hit-range { font-variant-numeric: tabular-nums; font-weight: 600; }
+.qs-hit-ids { margin-left: auto; }
+.qs-hit-segments { display: flex; flex-direction: column; gap: 2px; }
+.qs-hit-seg { font-size: 13px; line-height: 1.7; }
+.qs-hit-seg-time { font-variant-numeric: tabular-nums; }
+.qs-hit-seg mark {
+  background: #ffe08a; color: inherit;
+  border-radius: 2px; padding: 0 1px;
+}

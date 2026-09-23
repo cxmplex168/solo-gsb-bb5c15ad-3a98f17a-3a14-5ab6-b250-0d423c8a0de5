@@ -10,6 +10,7 @@ import { fmtTime, round3 } from '../utils.js'
  *   selectedId    highlighted annotation id
  *   highlightIds  extra annotation ids outlined (quality-check issues)
  *   focusRange    {start,end} range emphasized (quality-check location)
+ *   focusKind     'quality' (default, red) or 'quote' (blue)
  *   onSelect(a)   called when the user finishes dragging a range
  *   onClickItem(id)
  *   onBackgroundClick()  click on empty track (clears issue highlight)
@@ -23,6 +24,7 @@ export default function Timeline({
   selectedId = null,
   highlightIds = null,
   focusRange = null,
+  focusKind = 'quality',
   onSelect,
   onClickItem,
   onBackgroundClick,
@@ -141,7 +143,7 @@ export default function Timeline({
         ))}
         {focusRange && (
           <div
-            className="tl-focus"
+            className={`tl-focus tl-focus-${focusKind}`}
             style={{
               left: toX(focusRange.start),
               width: Math.max(1, toX(focusRange.end) - toX(focusRange.start)),

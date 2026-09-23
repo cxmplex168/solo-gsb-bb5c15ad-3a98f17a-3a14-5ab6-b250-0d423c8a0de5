@@ -59,6 +59,22 @@ class RulePreviewRequest(BaseModel):
     rule: RuleIn | None = None
 
 
+# ---------- quote search ----------
+
+class QuoteSearchRequest(BaseModel):
+    """Phrase (required) with optional speaker filter.
+
+    Whitespace-only phrases are rejected by the endpoint so that an empty
+    query never triggers a search.  ``document`` may carry the editor's
+    current (possibly unsaved) transcript; otherwise the saved project
+    document is used.
+    """
+    query: str = ""
+    speaker: str = ""
+    caseSensitive: bool = False
+    document: DocumentIn | None = None
+
+
 # ---------- annotation quality check ----------
 
 class QualityCheckRequest(BaseModel):

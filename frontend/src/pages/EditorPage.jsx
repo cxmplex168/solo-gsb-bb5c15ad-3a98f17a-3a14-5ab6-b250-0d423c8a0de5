@@ -4,6 +4,7 @@ import { api } from '../api.js'
 import Timeline from '../components/Timeline.jsx'
 import SegmentList from '../components/SegmentList.jsx'
 import AnnotationModal from '../components/AnnotationModal.jsx'
+import QuoteSearch from '../components/QuoteSearch.jsx'
 import {
   clone, downloadJson, emptyDocument, makeAnnotation, makeSegment, round3,
 } from '../utils.js'
@@ -20,6 +21,7 @@ export default function EditorPage() {
   const [error, setError] = useState('')
   const [modal, setModal] = useState(null) // { initial }
   const [qualityFocus, setQualityFocus] = useState(null) // {annId,range}
+  const [quoteFocus, setQuoteFocus] = useState(null) // {match, query}
   const importRef = useRef(null)
   const timelineRef = useRef(null)
 
@@ -54,6 +56,20 @@ export default function EditorPage() {
       searchParams.delete('focusEnd')
       setSearchParams(searchParams, { replace: true })
     }
+  }
+
+  // Clicking a quote-search result locates its time range on the timeline.
+  const locateQuote = (match) => {
+    setQualityFocus(null)
+    setQuoteFocus({ range: { start: match.start, end: match.end } })
+    timelineRef.current?.scrollIntoView(
+      { behavior: 'smooth', block: 'center' })
+  }
+
+  const clearQuoteFocus = () => setQuoteFocus(null)
+  const clearAllFocus = () => {
+    clearQualityFocus()
+    clearQuoteFocus()
   }
 
   const update = (patch) => {
@@ -97,7 +113,7 @@ export default function EditorPage() {
   }, [doc])
 
   const onTimelineSelect = (range) => {
-    clearQualityFocus()
+    clearAllFocus()
     setModal({ initial: range })
   }
 
@@ -230,11 +246,12 @@ export default function EditorPage() {
           annotations={doc.annotations}
           selectedId={modal?.initial?.id}
           highlightIds={qualityFocus?.annId ? [qualityFocus.annId] : null}
-          focusRange={qualityFocus?.range || null}
+          focusRange={qualityFocus?.range || quoteFocus?.range || null}
+          focusKind={qualityFocus ? 'quality' : 'quote'}
           onSelect={onTimelineSelect}
-          onBackgroundClick={clearQualityFocus}
+          onBackgroundClick={clearAllFocus}
           onClickItem={(annId) => {
-            clearQualityFocus()
+            clearAllFocus()
             const a = doc.annotations.find((x) => x.id === annId)
             if (a) setModal({ initial: clone(a) })
           }}
@@ -255,7 +272,27 @@ export default function EditorPage() {
             </Link>
           </div>
         )}
+        {quoteFocus && (
+          <div className="qc-focus-hint sev-info quote-focus-hint">
+            <strong>🔎 引语定位</strong>
+            <span>
+              {quoteFocus.range.start.toFixed(2)}s –{' '}
+              {quoteFocus.range.end.toFixed(2)}s
+            </span>
+            <button className="btn small" onClick={clearQuoteFocus}>
+              取消定位
+            </button>
+          </div>
+        )}
       </div>
+
+      <QuoteSearch
+        projectId={id}
+        document={doc}
+        speakers={speakers}
+        activeMatch={quoteFocus?.range || null}
+        onLocate={locateQuote}
+      />
 
       <SegmentList
         segments={doc.segments}
